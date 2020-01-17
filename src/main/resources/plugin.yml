@@ -1,0 +1,11 @@
+name: Zip_line
+version: @version@
+main: dekitateserver_event.zip_line.Zip_line
+api-version: 1.13
+prefix: ZL
+authors: [maeshow]
+description: Dekitate Server Event Plugin
+commands:
+  zipline:
+    description: zipline command.
+    permission: op
