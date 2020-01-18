@@ -5,8 +5,8 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 
@@ -60,12 +60,17 @@ public final class Zip_line extends JavaPlugin {
                 as.setInvulnerable(true);
                 as.setSilent(true);
                 as.setVisible(false);
+                Entity passenger = null;
 
                 for (int i = 0; i < entity.size(); i++) {
-                    Entity passenger = entity.get(i);
+                    passenger = entity.get(i);
                     as.addPassenger(passenger);
                 }
-                new ZipLineScheduler(this, counter, mdx, mdy, mdz, as).runTaskTimer(this, 0, 1);
+                if (passenger instanceof Player) {
+                    Player player = (Player) passenger;
+                    new PlayerLogout(this, as, player);
+                }
+                new ZipLineRun(this, counter, mdx, mdy, mdz, as).runTaskTimer(this, 0, 1);
                 return true;
 
             } else if (args[0].equalsIgnoreCase("debug")) {
@@ -73,12 +78,17 @@ public final class Zip_line extends JavaPlugin {
                 ArmorStand as = firstPassenger.getWorld().spawn(loc, ArmorStand.class);
                 as.setInvulnerable(true);
                 as.setSilent(true);
+                Entity passenger = null;
 
                 for (int i = 0; i < entity.size(); i++) {
-                    Entity passenger = entity.get(i);
+                    passenger = entity.get(i);
                     as.addPassenger(passenger);
                 }
-                new ZipLineScheduler(this, counter, mdx, mdy, mdz, as).runTaskTimer(this, 0, 1);
+                if (passenger instanceof Player) {
+                    Player player = (Player) passenger;
+                    new PlayerLogout(this, as, player);
+                }
+                new ZipLineRun(this, counter, mdx, mdy, mdz, as).runTaskTimer(this, 0, 1);
                 return true;
 
             } else if (args[0].equalsIgnoreCase("help")) {
@@ -113,8 +123,8 @@ public final class Zip_line extends JavaPlugin {
 
     private void help(CommandSender sender){
         sender.sendMessage(ChatColor.GREEN +"---------------ZipLine help---------------");
-        sender.sendMessage(ChatColor.GREEN +"/zipline set [始点座標] [終点座標] (乗り物:アーマスタンド, 状態:見えない)");
-        sender.sendMessage(ChatColor.GREEN +"/zipline debug [始点座標] [終点座標] (乗り物:アーマスタンド, 状態:見える)");
+        sender.sendMessage(ChatColor.GREEN +"/zipline set [セレクタ] [始点座標] [終点座標] (乗り物:アーマスタンド, 状態:見えない)");
+        sender.sendMessage(ChatColor.GREEN +"/zipline debug [セレクタ] [始点座標] [終点座標] (乗り物:アーマスタンド, 状態:見える)");
         sender.sendMessage(ChatColor.GREEN +"/zipline help (helpを表示)");
         sender.sendMessage(ChatColor.GREEN +"※始点と終点の間にブロックがあると埋まるので注意");
         sender.sendMessage(ChatColor.GREEN +"------------------------------------------");
