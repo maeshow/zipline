@@ -1,6 +1,7 @@
 package dekitateserver_event.zip_line;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.entity.Entity;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -36,10 +37,6 @@ public class ZipLineRun extends BukkitRunnable {
         if (counter > 0) {
             entity.setVelocity(v);
             counter--;
-            if (player != null && !player.isOnline()){
-                entity.remove();
-                this.cancel();
-            }
         } else {
             entity.setVelocity(v.zero());
             entity.remove();

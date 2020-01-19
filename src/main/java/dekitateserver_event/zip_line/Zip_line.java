@@ -3,6 +3,7 @@ package dekitateserver_event.zip_line;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandException;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -69,27 +70,29 @@ public final class Zip_line extends JavaPlugin {
                 }
                 if (passenger instanceof Player) {
                     player = (Player) passenger;
+                    new PlayerLogout(this, as, player);
                 }
                 new ZipLineRun(this, counter, mdx, mdy, mdz, as, player).runTaskTimer(this, 0, 1);
                 return true;
 
             } else if (args[0].equalsIgnoreCase("debug")) {
-                Location loc = new Location(playerLoc.getWorld(), sx, sy, sz);
-                ArmorStand as = firstPassenger.getWorld().spawn(loc, ArmorStand.class);
-                as.setInvulnerable(true);
-                as.setSilent(true);
-                Entity passenger = null;
-                Player player = null;
+                    Location loc = new Location(playerLoc.getWorld(), sx, sy, sz);
+                    ArmorStand as = firstPassenger.getWorld().spawn(loc, ArmorStand.class);
+                    as.setInvulnerable(true);
+                    as.setSilent(true);
+                    Entity passenger = null;
+                    Player player = null;
 
-                for (int i = 0; i < entity.size(); i++) {
-                    passenger = entity.get(i);
-                    as.addPassenger(passenger);
-                }
-                if (passenger instanceof Player) {
-                    player = (Player) passenger;
-                }
-                new ZipLineRun(this, counter, mdx, mdy, mdz, as, player).runTaskTimer(this, 0, 1);
-                return true;
+                    for (int i = 0; i < entity.size(); i++) {
+                        passenger = entity.get(i);
+                        as.addPassenger(passenger);
+                    }
+                    if (passenger instanceof Player) {
+                        player = (Player) passenger;
+                        new PlayerLogout(this, as, player);
+                    }
+                    new ZipLineRun(this, counter, mdx, mdy, mdz, as, player).runTaskTimer(this, 0, 1);
+                    return true;
 
             } else if (args[0].equalsIgnoreCase("help")) {
                 help(sender);
