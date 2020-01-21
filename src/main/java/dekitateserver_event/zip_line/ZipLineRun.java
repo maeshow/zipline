@@ -21,15 +21,11 @@ public class ZipLineRun extends BukkitRunnable {
 
     public ZipLineRun(JavaPlugin plugin, int counter, Double mdx, Double mdy, Double mdz, Entity entity, Player passenger) {
         this.plugin = plugin;
-        if (counter < 1) {
-            throw new IllegalArgumentException("始点と終点が近すぎます");
-        } else {
-            this.counter = counter;
-            this.entity = entity;
-            this.player = passenger;
+        this.counter = counter;
+        this.entity = entity;
+        this.player = passenger;
 
-            v = new Vector(mdx, mdy, mdz);
-        }
+        v = new Vector(mdx, mdy, mdz);
     }
 
     @Override

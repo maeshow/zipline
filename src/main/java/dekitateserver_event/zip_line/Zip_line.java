@@ -3,13 +3,12 @@ package dekitateserver_event.zip_line;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandException;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-
 
 import java.util.List;
 import java.util.ArrayList;
@@ -27,13 +26,22 @@ public final class Zip_line extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args){
         if (args.length != 0) {
-            double sx = Double.parseDouble(args[2]);
-            double sy = Double.parseDouble(args[3]);
-            double sz = Double.parseDouble(args[4]);
+            double sx,sy,sz, ex,ey,ez;
+            try {
+                sx = Double.parseDouble(args[2]);
+                sy = Double.parseDouble(args[3]);
+                sz = Double.parseDouble(args[4]);
 
-            double ex = Double.parseDouble(args[5]);
-            double ey = Double.parseDouble(args[6]);
-            double ez = Double.parseDouble(args[7]);
+                ex = Double.parseDouble(args[5]);
+                ey = Double.parseDouble(args[6]);
+                ez = Double.parseDouble(args[7]);
+            } catch (ArrayIndexOutOfBoundsException e){
+                sender.sendMessage(ChatColor.GRAY + "[ZL]" + ChatColor.DARK_RED + "引数が足りません");
+                return true;
+            } catch (NumberFormatException n){
+                sender.sendMessage(ChatColor.GRAY + "[ZL]" + ChatColor.DARK_RED + "座標を正しく入力してください");
+                return true;
+            }
 
             double dx = Math.abs(ex - sx);
             double dy = Math.abs(ey - sy);
@@ -45,29 +53,50 @@ public final class Zip_line extends JavaPlugin {
 
             int counter = (int) max * 3;
 
+            if (counter > 600){
+                sender.sendMessage(ChatColor.GRAY + "[ZL]" + ChatColor.DARK_RED + "始点と終点の差が大きすぎます");
+                return true;
+            }
+            if (counter < 1){
+                sender.sendMessage(ChatColor.GRAY + "[ZL]" + ChatColor.DARK_RED + "始点と終点の差が小さすぎます");
+                return true;
+            }
+
             double mdx = (ex - sx) / counter;
             double mdy = (ey - sy) / counter;
             double mdz = (ez - sz) / counter;
 
-            List<Entity> entity = selector(sender, args[1]);
-            List<Location> passLoc = entityLoc(entity);
+            Location playerLoc;
+            Entity firstPassenger;
+            List<Entity> entity;
+            ArmorStand as;
 
-            Location playerLoc = passLoc.get(0);
-            Entity firstPassenger = entity.get(0);
+            try {
+            entity = selector(sender, args[1]);
+                if (entity == null){return true;}
+            List<Location> passLoc = entityLoc(entity);
+                if (passLoc == null){return true;}
+
+            playerLoc = passLoc.get(0);
+            firstPassenger = entity.get(0);
+
+            } catch (IndexOutOfBoundsException e) {
+                sender.sendMessage(ChatColor.GRAY + "[ZL]" + ChatColor.DARK_RED + "Entity not found");
+                return true;
+            }
+
 
             if (args[0].equalsIgnoreCase("set")) {
-                Location loc = new Location(playerLoc.getWorld(), sx, sy, sz);
-                ArmorStand as = firstPassenger.getWorld().spawn(loc, ArmorStand.class);
-                as.setInvulnerable(true);
-                as.setSilent(true);
-                as.setVisible(false);
+                as = setAs(sender, playerLoc, sx, sy, sz, firstPassenger);
                 Entity passenger = null;
                 Player player = null;
 
+                if (as == null){return true;}
+                as.setVisible(false);
                 for (int i = 0; i < entity.size(); i++) {
                     passenger = entity.get(i);
                     as.addPassenger(passenger);
-                }
+            }
                 if (passenger instanceof Player) {
                     player = (Player) passenger;
                     new PlayerLogout(this, as, player);
@@ -76,13 +105,11 @@ public final class Zip_line extends JavaPlugin {
                 return true;
 
             } else if (args[0].equalsIgnoreCase("debug")) {
-                    Location loc = new Location(playerLoc.getWorld(), sx, sy, sz);
-                    ArmorStand as = firstPassenger.getWorld().spawn(loc, ArmorStand.class);
-                    as.setInvulnerable(true);
-                    as.setSilent(true);
+                    as = setAs(sender, playerLoc, sx, sy, sz, firstPassenger);
                     Entity passenger = null;
                     Player player = null;
 
+                    if (as == null){return true;}
                     for (int i = 0; i < entity.size(); i++) {
                         passenger = entity.get(i);
                         as.addPassenger(passenger);
@@ -107,7 +134,6 @@ public final class Zip_line extends JavaPlugin {
         try {
             return selectEntities(sender, selector);
         } catch (IllegalArgumentException e) {
-            sender.sendMessage("Entity not found");
             return null;
         }
     }
@@ -120,6 +146,19 @@ public final class Zip_line extends JavaPlugin {
             );
             return passLoc;
         } catch (IllegalArgumentException e){
+            return null;
+        }
+    }
+
+    private ArmorStand setAs(CommandSender sender, Location playerLoc, double sx, double sy, double sz, Entity firstPassenger){
+        try {
+            Location loc = new Location(playerLoc.getWorld(), sx, sy, sz);
+            ArmorStand as = firstPassenger.getWorld().spawn(loc, ArmorStand.class);
+            as.setInvulnerable(true);
+            as.setSilent(true);
+            return as;
+        } catch (NullPointerException e) {
+            sender.sendMessage(ChatColor.GRAY + "[ZL]" + ChatColor.DARK_RED + "Entity not found");
             return null;
         }
     }
@@ -137,5 +176,6 @@ public final class Zip_line extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
         getLogger().info("プラグインが無効になりました");
+        PlayerQuitEvent.getHandlerList().unregister(this);
     }
 }

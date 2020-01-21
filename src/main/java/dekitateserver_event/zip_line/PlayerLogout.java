@@ -24,7 +24,6 @@ public class PlayerLogout implements Listener {
         if (player == passenger) {
             entity.remove();
         }
-        PlayerQuitEvent.getHandlerList().unregister(plugin);
     }
 
 }
